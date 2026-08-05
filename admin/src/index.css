@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/* Tailwind v4 defaults `dark:` to the OS's prefers-color-scheme media
+   query. We toggle a `.dark` class on <html> instead (see ThemeContext),
+   so dark: utilities need to be told to key off that class — without
+   this, the theme toggle button silently does nothing. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Neutral slate scale — the admin's structural color */
+  --color-slate-25: #fbfbfc;
+  --color-slate-50: #f7f8fa;
+  --color-slate-100: #eef0f3;
+  --color-slate-200: #dfe2e8;
+  --color-slate-300: #c3c8d2;
+  --color-slate-400: #8b93a3;
+  --color-slate-500: #636c7d;
+  --color-slate-600: #4a5261;
+  --color-slate-700: #363c48;
+  --color-slate-800: #232730;
+  --color-slate-900: #15171d;
+  --color-slate-950: #0b0c10;
+
+  /* Indigo — the admin's primary accent (distinct from the public site's orange) */
+  --color-brand-50: #eef1ff;
+  --color-brand-100: #e0e4ff;
+  --color-brand-200: #c2c6fb;
+  --color-brand-300: #9da3f9;
+  --color-brand-400: #7b82f6;
+  --color-brand-500: #5b5ff0;
+  --color-brand-600: #4744e0;
+  --color-brand-700: #3934bd;
+
+  --color-success-500: #17a673;
+  --color-success-100: #d3f5e6;
+  --color-warning-500: #e0972b;
+  --color-warning-100: #fbead0;
+  --color-danger-500: #e2483d;
+  --color-danger-400: #ea7a6d;
+  --color-danger-100: #fbdedb;
+  --color-info-500: #2f8fe0;
+  --color-info-100: #dbeefd;
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-900);
+}
+.dark body {
+  background-color: var(--color-slate-950);
+  color: var(--color-slate-100);
+}
+
+::selection { background: var(--color-brand-500); color: white; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-slate-300); border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb { background: var(--color-slate-700); }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-slate-100) 25%, var(--color-slate-200) 37%, var(--color-slate-100) 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, var(--color-slate-800) 25%, var(--color-slate-700) 37%, var(--color-slate-800) 63%);
+  background-size: 400px 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* Tailwind v4 defaults `dark:` to the OS's prefers-color-scheme media
+   query. We toggle a `.dark` class on <html> instead (see ThemeContext),
+   so every `dark:` utility needs to be told to key off that class —
+   without this line, dark: utilities silently ignore the toggle button
+   and only follow the system setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: 'Fraunces', serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --color-ember-50: #fff4ec;
+  --color-ember-100: #ffe4cf;
+  --color-ember-200: #ffd0a8;
+  --color-ember-300: #ffb173;
+  --color-ember-400: #ff8a3d;
+  --color-ember-500: #FF6B00;
+  --color-ember-600: #e05f00;
+  --color-ember-700: #b84c00;
+  --color-ember-900: #6b2c00;
+
+  --color-ink-950: #0e0f12;
+  --color-ink-900: #16181d;
+  --color-ink-800: #1B1D22;
+  --color-ink-700: #2a2d35;
+  --color-ink-600: #4B5361;
+  --color-ink-500: #626a79;
+  --color-ink-400: #7a8291;
+  --color-ink-300: #a8adb7;
+  --color-ink-200: #d6d9de;
+  --color-ink-100: #eceeef;
+  --color-ink-50: #FAFAF9;
+
+  --color-steel-500: #1E5AA8;
+  --color-steel-400: #3577c9;
+  --color-steel-600: #164780;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-ink-50);
+  color: var(--color-ink-800);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: var(--color-ink-950);
+  color: var(--color-ink-100);
+}
+
+::selection {
+  background: var(--color-ember-500);
+  color: white;
+}
+
+/* Roofline divider — signature motif: angled cut like a roof pitch */
+.roofline-down {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 88%);
+}
+.roofline-up {
+  clip-path: polygon(0 12%, 100% 0, 100% 100%, 0 100%);
+}
+@media (min-width: 768px) {
+  .roofline-down { clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
+  .roofline-up { clip-path: polygon(0 8%, 100% 0, 100% 100%, 0 100%); }
+}
+
+.text-balance { text-wrap: balance; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-ink-200); border-radius: 999px; }
+.dark ::-webkit-scrollbar-thumb { background: var(--color-ink-700); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
