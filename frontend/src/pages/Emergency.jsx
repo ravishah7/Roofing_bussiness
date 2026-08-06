@@ -2,6 +2,7 @@ import { Phone, Clock, ShieldAlert, Siren } from 'lucide-react'
 import Seo from '@/components/Seo'
 import Container from '@/components/ui/Container'
 import Button from '@/components/ui/Button'
+import { useSettings } from '@/hooks/useSettings'
 
 const STEPS = [
   { title: 'Call Now', desc: 'Reach our 24/7 emergency line and describe the damage.' },
@@ -10,6 +11,9 @@ const STEPS = [
 ]
 
 export default function Emergency() {
+  const { settings } = useSettings()
+  const { emergencyPhone } = settings.business
+  const cleanEmergencyPhone = emergencyPhone.replace(/[^\d+]/g, '')
   return (
     <>
       <Seo title="Emergency Roofing" description="24/7 emergency roof repair for storm damage and active leaks." path="/emergency-roofing" />
@@ -27,8 +31,8 @@ export default function Emergency() {
             further damage — call now for immediate dispatch.
           </p>
           <div className="mt-10 flex justify-center">
-            <Button as="a" href="tel:+18005559111" size="lg" icon={Phone} iconPosition="left">
-              Call (800) 555-9111
+            <Button as="a" href={`tel:${cleanEmergencyPhone}`} size="lg" icon={Phone} iconPosition="left">
+              Call {emergencyPhone}
             </Button>
           </div>
         </Container>

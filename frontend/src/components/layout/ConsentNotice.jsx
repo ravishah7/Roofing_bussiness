@@ -2,17 +2,22 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Cookie } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function ConsentNotice() {
   const [show, setShow] = useState(false)
+  const { settings, isLoading } = useSettings()
+  const { isEnabled, message, policyUrl } = settings.cookieBanner
 
   useEffect(() => {
+    if (isLoading) return // don't show until we know whether it's enabled
+    if (!isEnabled) return
     const seen = window.localStorage.getItem('roofco-cookie-consent')
     if (!seen) {
       const t = setTimeout(() => setShow(true), 1200)
       return () => clearTimeout(t)
     }
-  }, [])
+  }, [isLoading, isEnabled])
 
   const accept = () => {
     window.localStorage.setItem('roofco-cookie-consent', 'true')
@@ -31,8 +36,12 @@ export default function ConsentNotice() {
         >
           <Cookie className="h-6 w-6 shrink-0 text-ember-500" />
           <p className="text-sm text-ink-600 dark:text-ink-300">
-            We use cookies to improve your browsing experience and analyze site traffic. See our{' '}
-            <a href="/privacy-policy" className="font-medium text-ember-600 underline dark:text-ember-400">Privacy Policy</a>.
+            {message}{' '}
+            {policyUrl && (
+              <a href={policyUrl} className="font-medium text-ember-600 underline dark:text-ember-400">
+                Privacy Policy
+              </a>
+            )}.
           </p>
           <Button size="sm" onClick={accept} className="w-full shrink-0 sm:w-auto">
             Accept

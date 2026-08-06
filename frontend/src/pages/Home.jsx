@@ -11,15 +11,25 @@ import FinancingBanner from '@/components/home/FinancingBanner'
 import EmergencyBanner from '@/components/home/EmergencyBanner'
 import FaqPreview from '@/components/home/FaqPreview'
 import FinalCta from '@/components/home/FinalCta'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function Home() {
+  const { settings, isLoading, isError } = useSettings()
+
+  if (isLoading) return null // or a loading spinner
+  if (isError) return null // or an error component
+
   return (
     <>
       <Seo
-        title="Premium Residential & Commercial Roofing"
-        description="Licensed roofing contractor with 27 years of experience. Free inspections, emergency repair, insurance claims, and financing available."
+        title={settings.seo?.metaTitle || 'Expert Roofing Services'}
+        description={
+          settings.seo?.metaDescription ||
+          'Your existing description here'
+        }
         path="/"
       />
+
       <Hero />
       <StatsCounter />
       <TrustedBy />

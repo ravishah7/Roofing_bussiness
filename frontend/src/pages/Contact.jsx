@@ -6,8 +6,14 @@ import Seo from '@/components/Seo'
 import PageHero from '@/components/ui/PageHero'
 import Container from '@/components/ui/Container'
 import Button from '@/components/ui/Button'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function Contact() {
+  const { settings } = useSettings()
+  const { phone, emergencyPhone, email, address, openingHours } = settings.business
+  const cleanPhone = phone.replace(/[^\d+]/g, '')
+  const cleanEmergencyPhone = emergencyPhone.replace(/[^\d+]/g, '')
+  const addressStr = [address.street, [address.city, address.state, address.zip].filter(Boolean).join(', ')].filter(Boolean).join(', ')
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
   const [status, setStatus] = useState('idle')
 
@@ -29,9 +35,9 @@ export default function Contact() {
           <div className="lg:col-span-2">
             <div className="space-y-5">
               {[
-                { icon: Phone, label: 'Call Us', value: '(800) 555-1212', href: 'tel:+18005551212' },
-                { icon: Mail, label: 'Email Us', value: 'hello@summitroofco.com', href: 'mailto:hello@summitroofco.com' },
-                { icon: MapPin, label: 'Visit Us', value: '4820 Roofline Avenue, Suite 200, Chicago, IL 60601' },
+                { icon: Phone, label: 'Call Us', value: phone, href: `tel:${cleanPhone}` },
+                { icon: Mail, label: 'Email Us', value: email, href: `mailto:${email}` },
+                { icon: MapPin, label: 'Visit Us', value: addressStr },
                 { icon: Clock, label: 'Business Hours', value: 'Mon–Sat: 7am – 7pm · Emergency line 24/7' },
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-4 rounded-2xl border border-ink-100 p-5 dark:border-ink-800">
@@ -50,7 +56,7 @@ export default function Contact() {
                 <Siren className="mt-0.5 h-5 w-5 shrink-0 text-ember-600" />
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-ember-600 dark:text-ember-400">Emergency Line</p>
-                  <a href="tel:+18005559111" className="mt-1 block font-semibold text-ink-900 dark:text-white">(800) 555-9111</a>
+                  <a href={`tel:${cleanEmergencyPhone}`} className="mt-1 block font-semibold text-ink-900 dark:text-white">{emergencyPhone}</a>
                 </div>
               </div>
             </div>

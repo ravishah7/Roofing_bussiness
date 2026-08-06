@@ -8,7 +8,26 @@ import App from './App.jsx'
 import './index.css'
 
 const queryClient = new QueryClient()
+async function applyDynamicFavicon() {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || '/api'
+    const res = await fetch(`${apiUrl}/settings`)
+    const json = await res.json()
+    const faviconUrl = json?.data?.favicon?.url
+    if (faviconUrl) {
+      const link = document.getElementById('dynamic-favicon')
+        || document.querySelector("link[rel~='icon']")
+      if (link) {
+        link.href = faviconUrl
+        link.type = 'image/png'
+      }
+    }
+  } catch {
+    
+  }
+}
 
+applyDynamicFavicon()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HelmetProvider>

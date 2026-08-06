@@ -10,6 +10,7 @@ import FinalCta from '@/components/home/FinalCta'
 import ServiceDetailHero from '@/components/services/ServiceDetailHero'
 import ServiceCard from '@/components/services/ServiceCard'
 import { useResourceItem, useResourceList } from '@/hooks/useContentQueries'
+import { useSettings } from '@/hooks/useSettings'
 import { normalizeService, formatPricing } from '@/lib/normalizeService'
 import { SERVICES as FALLBACK_SERVICES } from '@/data/site'
 import NotFound from './NotFound'
@@ -21,7 +22,8 @@ export default function ServiceDetail() {
   const { data, isLoading, isError } = useResourceItem('services', slug)
   const { data: listData } = useResourceList('services', { limit: 100, sort: 'order' })
 
-  const rawService = data?.data
+  const { settings } = useSettings()
+  const { name: businessName } = settings.business
   const fallbackRaw = FALLBACK_SERVICES.find((s) => s.slug === slug)
   const service = rawService
     ? normalizeService(rawService)
@@ -60,7 +62,7 @@ export default function ServiceDetail() {
           '@type': 'Service',
           serviceType: service.title,
           description: service.description,
-          provider: { '@type': 'RoofingContractor', name: 'Summit Roof Co.' },
+          provider: { '@type': 'RoofingContractor', name: businessName },
         }}
       />
 

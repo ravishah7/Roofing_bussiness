@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Sun, Moon, Phone, TriangleAlert } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
+import { useSettings } from '@/hooks/useSettings'
 import { NAV_LINKS } from '@/data/site'
 import Container from '@/components/ui/Container'
 import Button from '@/components/ui/Button'
@@ -12,6 +13,9 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
+  const { settings } = useSettings()
+  const { name, phone, email } = settings.business
+  const cleanPhone = phone.replace(/[^\d+]/g, '')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -31,9 +35,9 @@ export default function Navbar() {
             24/7 Emergency Roofing — storm damage response within the hour
           </p>
           <div className="flex items-center gap-6">
-            <a href="mailto:hello@summitroofco.com" className="hover:text-ink-900 dark:hover:text-white transition-colors">hello@summitroofco.com</a>
-            <a href="tel:+18005551212" className="flex items-center gap-1.5 font-semibold text-ink-900 hover:text-ember-600 dark:text-white dark:hover:text-ember-400 transition-colors">
-              <Phone className="h-3.5 w-3.5" /> (800) 555-1212
+            <a href={`mailto:${email}`} className="hover:text-ink-900 dark:hover:text-white transition-colors">{email}</a>
+            <a href={`tel:${cleanPhone}`} className="flex items-center gap-1.5 font-semibold text-ink-900 hover:text-ember-600 dark:text-white dark:hover:text-ember-400 transition-colors">
+              <Phone className="h-3.5 w-3.5" /> {phone}
             </a>
           </div>
         </Container>
@@ -48,9 +52,15 @@ export default function Navbar() {
       >
         <Container className="flex h-20 items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ember-500 font-display text-lg font-bold text-white">S</span>
+            {settings.logo?.url ? (
+              <img src={settings.logo.url} alt={name} className="h-10 w-auto object-contain" />
+            ) : (
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ember-500 font-display text-lg font-bold text-white">
+                {name.charAt(0)}
+              </span>
+            )}
             <span className="font-display text-xl font-semibold tracking-tight text-ink-900 dark:text-white">
-              Summit Roof Co.
+              {name}
             </span>
           </Link>
 
@@ -60,7 +70,7 @@ export default function Navbar() {
                 key={link.href}
                 to={link.href}
                 className={({ isActive }) =>
-                  `relative text-sm font-medium transition-colors ${
+                  `text-sm font-medium transition-colors ${
                     isActive
                       ? 'text-ember-600 dark:text-ember-400'
                       : 'text-ink-700 hover:text-ember-600 dark:text-ink-200 dark:hover:text-ember-400'

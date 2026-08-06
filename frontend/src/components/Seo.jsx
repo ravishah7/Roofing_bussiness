@@ -1,21 +1,24 @@
 import { Helmet } from 'react-helmet-async'
+import { useSettings } from '@/hooks/useSettings'
 
 export default function Seo({ title, description, path = '/', image, structuredData }) {
-  const fullTitle = `${title} | Summit Roof Co.`
+  const { settings } = useSettings()
+  const { name, phone, address } = settings.business
+  const fullTitle = `${title} | ${name}`
   const url = `https://summitroofco.com${path}`
 
   const jsonLd = structuredData ?? {
     '@context': 'https://schema.org',
     '@type': 'RoofingContractor',
-    name: 'Summit Roof Co.',
-    telephone: '+1-800-555-1212',
+    name,
+    telephone: phone,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '4820 Roofline Avenue, Suite 200',
-      addressLocality: 'Chicago',
-      addressRegion: 'IL',
-      postalCode: '60601',
-      addressCountry: 'US',
+      streetAddress: address.street,
+      addressLocality: address.city,
+      addressRegion: address.state,
+      postalCode: address.zip,
+      addressCountry: address.country || 'US',
     },
   }
 
