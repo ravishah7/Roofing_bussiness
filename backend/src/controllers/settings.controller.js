@@ -60,3 +60,12 @@ export const updateFavicon = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, settings, 'Favicon updated'))
 })
+export const setHomeBeforeAfter = asyncHandler(async (req, res) => {
+  const { projectId } = req.body
+  const settings = await Settings.findOneAndUpdate(
+    {},
+    { homeBeforeAfter: projectId || null },
+    { new: true, upsert: true }
+  )
+  res.status(200).json(new ApiResponse(200, settings, 'Home slider updated'))
+})

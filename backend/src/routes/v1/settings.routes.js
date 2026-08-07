@@ -11,5 +11,6 @@ router.use(protect, authorize('super_admin', 'admin'))
 router.patch('/', settingsController.updateSettings)
 router.patch('/logo', uploadImage.single('logo'), settingsController.updateLogo)
 router.patch('/favicon', uploadImage.single('favicon'), settingsController.updateFavicon)
+router.patch('/home-before-after', settingsController.setHomeBeforeAfter)
 
 export default router

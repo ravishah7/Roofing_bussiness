@@ -50,28 +50,30 @@ export default function ProjectForm() {
   const [servicesUsed, setServicesUsed] = useState([])
 
   const { data: existing, isLoading } = useResourceItem('projects', isEdit ? id : null)
-  const { data: servicesRes } = useResourceList('services', { limit: 100, status: 'published' })
+  const { data: servicesRes } = useResourceList('services', { limit: 100, status: 'published'})
+  const { data: categoriesRes } = useResourceList('categories', { limit: 100, sort: 'name' })
   const createProject = useCreateResource('projects', { successMessage: 'Project created' })
   const updateProject = useUpdateResource('projects', { successMessage: 'Project updated' })
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(projectSchema),
-    defaultValues: { title: '', description: '', city: '', state: '', completionDate: '', status: 'draft', customerName: '', customerRating: 5, customerReview: '' },
+    defaultValues: { title: '', description: '', city: '', state: '', completionDate: '', status: 'draft', customerName: '', customerRating: 5, customerReview: '', category: '' },
   })
 
   useEffect(() => {
     if (existing) {
       reset({
-        title: existing.title,
-        description: existing.description,
-        city: existing.location?.city || '',
-        state: existing.location?.state || '',
-        completionDate: existing.completionDate ? existing.completionDate.slice(0, 10) : '',
-        status: existing.status,
-        customerName: existing.customerReview?.name || '',
-        customerRating: existing.customerReview?.rating || 5,
-        customerReview: existing.customerReview?.text || '',
-      })
+      title: existing.title,
+      description: existing.description,
+      city: existing.location?.city || '',
+      state: existing.location?.state || '',
+      completionDate: existing.completionDate ? existing.completionDate.slice(0, 10) : '',
+      status: existing.status,
+      customerName: existing.customerReview?.name || '',
+      customerRating: existing.customerReview?.rating || 5,
+      customerReview: existing.customerReview?.text || '',
+      category: typeof existing.category === 'object' ? existing.category?._id : existing.category || '',
+    })
       setCoverPreview(existing.coverImage?.url || null)
       setGalleryPreviews((existing.gallery || []).map((i) => i.url))
       setBeforePreviews((existing.beforeImages || []).map((i) => i.url))
@@ -85,6 +87,7 @@ export default function ProjectForm() {
     form.append('title', values.title)
     form.append('description', values.description)
     form.append('status', values.status)
+    if (values.category) form.append('category', values.category)
     if (values.city) form.append('location', JSON.stringify({ city: values.city, state: values.state }))
     if (values.completionDate) form.append('completionDate', values.completionDate)
     if (values.customerName) {
@@ -171,11 +174,19 @@ export default function ProjectForm() {
         <div className="space-y-6">
           <Card>
             <CardHeader><CardTitle>Publish</CardTitle></CardHeader>
-            <CardContent>
+            <CardContent className="space-y-5">
               <FormField label="Status">
                 <Select {...register('status')}>
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
+                </Select>
+              </FormField>
+              <FormField label="Category">
+                <Select {...register('category')}>
+                  <option value="">— No category —</option>
+                  {(categoriesRes?.data || []).map((c) => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
                 </Select>
               </FormField>
             </CardContent>

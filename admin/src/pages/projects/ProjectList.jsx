@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, FolderKanban, MapPin } from 'lucide-react'
+import { Plus, Pencil, Trash2, FolderKanban, MapPin, LayoutTemplate } from 'lucide-react'
 import { useResourceList, useDeleteResource, useBulkDeleteResource } from '@/hooks/useResource'
 import PageHeader from '@/components/ui/PageHeader'
 import Card from '@/components/ui/Card'
@@ -12,8 +12,15 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import EmptyState from '@/components/ui/EmptyState'
 import { formatDate } from '@/lib/utils'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import api from '@/lib/api'
 
-const STATUS_TABS = [{ value: '', label: 'All' }, { value: 'published', label: 'Published' }, { value: 'draft', label: 'Draft' }]
+const STATUS_TABS = [
+  { value: '', label: 'All' },
+  { value: 'published', label: 'Published' },
+  { value: 'draft', label: 'Draft' },
+]
 
 export default function ProjectList() {
   const navigate = useNavigate()
@@ -22,49 +29,142 @@ export default function ProjectList() {
   const [status, setStatus] = useState('')
   const [sort, setSort] = useState('-completionDate')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const qc = useQueryClient()
 
-  const { data, isLoading } = useResourceList('projects', { page, limit: 10, search, status: status || undefined, sort })
+  const { data, isLoading } = useResourceList('projects', {
+    page, limit: 10, search, status: status || undefined, sort,
+  })
   const deleteProject = useDeleteResource('projects', { successMessage: 'Project deleted' })
   const bulkDelete = useBulkDeleteResource('projects')
 
+  // Must be declared BEFORE columns so render functions can close over them
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => (await api.get('/settings')).data.data,
+  })
+  const currentSliderId =
+    settingsData?.homeBeforeAfter?._id ?? settingsData?.homeBeforeAfter ?? null
+
+  const setSlider = useMutation({
+    mutationFn: async (projectId) =>
+      (await api.patch('/settings/home-before-after', { projectId })).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['settings'] })
+      toast.success('Home slider updated')
+    },
+    onError: () => toast.error('Failed to update home slider'),
+  })
+
   const columns = [
     {
-      key: 'title', label: 'Project', sortable: true,
+      key: 'title',
+      label: 'Project',
+      sortable: true,
       render: (row) => (
         <div className="flex items-center gap-3">
           {row.coverImage?.url ? (
             <img src={row.coverImage.url} alt="" className="h-9 w-9 rounded-lg object-cover" />
           ) : (
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-400 dark:bg-slate-800"><FolderKanban className="h-4 w-4" /></span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-400 dark:bg-slate-800">
+              <FolderKanban className="h-4 w-4" />
+            </span>
           )}
-          <Link to={`/projects/${row._id}/edit`} className="line-clamp-1 font-medium text-slate-800 hover:text-brand-600 dark:text-slate-100">{row.title}</Link>
+          <Link
+            to={`/projects/${row._id}/edit`}
+            className="line-clamp-1 font-medium text-slate-800 hover:text-brand-600 dark:text-slate-100"
+          >
+            {row.title}
+          </Link>
         </div>
       ),
     },
     {
-      key: 'location', label: 'Location', sortable: false,
-      render: (row) => row.location?.city ? <span className="flex items-center gap-1 text-xs text-slate-500"><MapPin className="h-3.5 w-3.5" />{row.location.city}, {row.location.state}</span> : '—',
+      key: 'location',
+      label: 'Location',
+      sortable: false,
+      render: (row) =>
+        row.location?.city ? (
+          <span className="flex items-center gap-1 text-xs text-slate-500">
+            <MapPin className="h-3.5 w-3.5" />
+            {row.location.city}, {row.location.state}
+          </span>
+        ) : '—',
     },
-    { key: 'status', label: 'Status', render: (row) => <StatusBadge status={row.status} /> },
-    { key: 'completionDate', label: 'Completed', sortable: true, render: (row) => formatDate(row.completionDate) },
     {
-      key: 'actions', label: '', hideable: false, sortable: false,
-      render: (row) => (
-        <div className="flex items-center justify-end gap-1">
-          <button onClick={() => navigate(`/projects/${row._id}/edit`)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"><Pencil className="h-4 w-4" /></button>
-          <button onClick={() => setDeleteTarget(row)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-danger-100 hover:text-danger-500 dark:hover:bg-danger-500/15"><Trash2 className="h-4 w-4" /></button>
-        </div>
-      ),
+      key: 'status',
+      label: 'Status',
+      render: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: 'completionDate',
+      label: 'Completed',
+      sortable: true,
+      render: (row) => formatDate(row.completionDate),
+    },
+    {
+      key: 'actions',
+      label: '',
+      hideable: false,
+      sortable: false,
+      render: (row) => {
+        const isActive = currentSliderId === row._id
+        return (
+          <div className="flex items-center justify-end gap-1">
+            <button
+              onClick={() => setSlider.mutate(isActive ? null : row._id)}
+              disabled={setSlider.isPending}
+              title={isActive ? 'Remove from home slider' : 'Set as home before/after slider'}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors disabled:opacity-50 ${
+                isActive
+                  ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400'
+                  : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800'
+              }`}
+            >
+              <LayoutTemplate className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate(`/projects/${row._id}/edit`)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDeleteTarget(row)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-danger-100 hover:text-danger-500 dark:hover:bg-danger-500/15"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )
+      },
     },
   ]
 
   return (
     <div>
-      <PageHeader title="Projects" description="Showcase completed roofing projects." actions={<Button icon={Plus} onClick={() => navigate('/projects/create')}>New Project</Button>} />
+      <PageHeader
+        title="Projects"
+        description="Showcase completed roofing projects. Use the layout icon to set a project's before/after images as the home page slider."
+        actions={
+          <Button icon={Plus} onClick={() => navigate('/projects/create')}>
+            New Project
+          </Button>
+        }
+      />
+
       <Card>
         <div className="flex flex-col gap-4 border-b border-slate-100 p-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-          <Tabs tabs={STATUS_TABS} active={status} onChange={(v) => { setStatus(v); setPage(1) }} />
-          <SearchBar value={search} onChange={(v) => { setSearch(v); setPage(1) }} placeholder="Search projects..." className="w-full sm:w-64" />
+          <Tabs
+            tabs={STATUS_TABS}
+            active={status}
+            onChange={(v) => { setStatus(v); setPage(1) }}
+          />
+          <SearchBar
+            value={search}
+            onChange={(v) => { setSearch(v); setPage(1) }}
+            placeholder="Search projects..."
+            className="w-full sm:w-64"
+          />
         </div>
         <DataTable
           columns={columns}
@@ -75,17 +175,30 @@ export default function ProjectList() {
           onPageChange={setPage}
           sort={sort}
           onSortChange={setSort}
-          emptyState={<EmptyState icon={FolderKanban} title="No projects yet" description="Add your first completed project." actionLabel="New Project" onAction={() => navigate('/projects/create')} />}
-          bulkActions={[{ label: 'Delete', icon: Trash2, variant: 'danger', onClick: (ids) => bulkDelete.mutate(ids) }]}
+          emptyState={
+            <EmptyState
+              icon={FolderKanban}
+              title="No projects yet"
+              description="Add your first completed project."
+              actionLabel="New Project"
+              onAction={() => navigate('/projects/create')}
+            />
+          }
+          bulkActions={[
+            { label: 'Delete', icon: Trash2, variant: 'danger', onClick: (ids) => bulkDelete.mutate(ids) },
+          ]}
         />
       </Card>
+
       <ConfirmDialog
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="Delete this project?"
         description={`"${deleteTarget?.title}" will be permanently deleted.`}
         loading={deleteProject.isPending}
-        onConfirm={() => deleteProject.mutate(deleteTarget._id, { onSuccess: () => setDeleteTarget(null) })}
+        onConfirm={() =>
+          deleteProject.mutate(deleteTarget._id, { onSuccess: () => setDeleteTarget(null) })
+        }
       />
     </div>
   )

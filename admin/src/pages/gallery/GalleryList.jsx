@@ -27,6 +27,7 @@ export default function GalleryList() {
   const [imagePreviews, setImagePreviews] = useState([])
 
   const { data, isLoading } = useResourceList('gallery', { limit: 100, sort: '-createdAt' })
+  const { data: categoriesRes } = useResourceList('categories', { limit: 100, sort: 'name' })
   const createAlbum = useCreateResource('gallery', { successMessage: 'Album created' })
   const updateAlbum = useUpdateResource('gallery', { successMessage: 'Album updated' })
   const deleteAlbum = useDeleteResource('gallery', { successMessage: 'Album deleted' })
@@ -34,12 +35,12 @@ export default function GalleryList() {
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: zodResolver(albumSchema) })
 
   const openCreate = () => {
-    setEditing(null); reset({ title: '', description: '', status: 'published' })
+    setEditing(null); reset({ title: '', description: '', status: 'published', category: '' })
     setCoverFile(null); setCoverPreview(null); setImageFiles([]); setImagePreviews([])
     setModalOpen(true)
   }
   const openEdit = (a) => {
-    setEditing(a); reset({ title: a.title, description: a.description || '', status: a.status })
+    setEditing(a); reset({ title: a.title, description: a.description || '', status: a.status, category: a.category || '' })
     setCoverPreview(a.coverImage?.url || null); setCoverFile(null)
     setImagePreviews((a.images || []).map((i) => i.url)); setImageFiles([])
     setModalOpen(true)
@@ -50,6 +51,7 @@ export default function GalleryList() {
     form.append('title', values.title)
     form.append('description', values.description || '')
     form.append('status', values.status)
+    if (values.category) form.append('category', values.category)
     if (coverFile) form.append('coverImage', coverFile)
     imageFiles.forEach((f) => form.append('images', f))
 
@@ -90,7 +92,9 @@ export default function GalleryList() {
                   <p className="font-medium text-slate-800 dark:text-slate-100">{a.title}</p>
                   <StatusBadge status={a.status} />
                 </div>
-                <p className="mt-1 text-xs text-slate-400">{a.images?.length || 0} photos</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  {a.images?.length || 0} photos{a.category?.name ? ` · ${a.category.name}` : ''}
+                </p>
               </div>
             </Card>
           ))}
@@ -108,6 +112,14 @@ export default function GalleryList() {
           <FormField label="Title" error={errors.title?.message} required><Input {...register('title')} error={!!errors.title} /></FormField>
           <FormField label="Description"><Textarea rows={2} {...register('description')} /></FormField>
           <FormField label="Status"><Select {...register('status')}><option value="published">Published</option><option value="draft">Draft</option></Select></FormField>
+          <FormField label="Category" hint="Used to filter albums on the gallery page">
+            <Select {...register('category')}>
+              <option value="">— No category —</option>
+              {(categoriesRes?.data || []).map((c) => (
+                <option key={c._id} value={c._id}>{c.name}</option>
+              ))}
+            </Select>
+          </FormField>
           <FormField label="Cover Image">
             <ImageUpload value={coverPreview} onFilesSelected={([f]) => { setCoverFile(f); setCoverPreview(URL.createObjectURL(f)) }} onRemove={() => { setCoverFile(null); setCoverPreview(null) }} />
           </FormField>

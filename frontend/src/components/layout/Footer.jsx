@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 import { Link } from 'react-router-dom'
 import { Phone, Mail, MapPin, ArrowUpRight } from 'lucide-react'
 import Container from '@/components/ui/Container'
@@ -13,7 +16,62 @@ const SOCIAL_ICONS = {
   twitter: TwitterIcon,
   linkedin: LinkedinIcon,
 }
+function NewsletterForm() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState('idle') // idle | loading | success | error
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email.trim()) return
+    setStatus('loading')
+    try {
+      await api.post('/newsletter/subscribe', { email: email.trim().toLowerCase() })
+      setStatus('success')
+      setEmail('')
+    } catch (err) {
+      // 409 means already subscribed — treat as success so we don't leak info
+      if (err?.response?.status === 409) {
+        setStatus('success')
+        setEmail('')
+      } else {
+        setStatus('error')
+      }
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <div className="flex items-center gap-2 rounded-xl bg-ember-50 px-5 py-3 text-sm font-medium text-ember-700 dark:bg-ember-500/10 dark:text-ember-400">
+        <CheckCircle2 className="h-4 w-4 shrink-0" /> You're subscribed — thanks!
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex w-full max-w-sm gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
+        placeholder="your@email.com"
+        className="min-w-0 flex-1 rounded-xl border border-ink-200 bg-white px-4 py-2.5 text-sm text-ink-900 placeholder-ink-400 focus:border-ember-500 focus:outline-none dark:border-ink-700 dark:bg-ink-900 dark:text-white dark:placeholder-ink-500"
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="flex items-center gap-1.5 rounded-xl bg-ember-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-600 disabled:opacity-60"
+      >
+        {status === 'loading' ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <>Subscribe <ArrowUpRight className="h-3.5 w-3.5" /></>
+        )}
+      </button>
+      {status === 'error' && <p className="mt-1 text-xs text-red-500">Something went wrong — try again.</p>}
+    </form>
+  )
+}
 export default function Footer() {
   const { settings } = useSettings()
   const { name, phone, email, address, licenseNumber } = settings.business
@@ -109,7 +167,18 @@ const footerServices = servicesData?.data?.length ? servicesData.data : []
           </Link>
         </div>
       </Container>
-
+      {/* Newsletter signup */}
+      <div className="border-t border-ink-200 dark:border-ink-900">
+        <Container className="py-10">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div>
+              <p className="font-display font-semibold text-ink-900 dark:text-white">Stay in the loop</p>
+              <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">Roofing tips, seasonal maintenance reminders, and company news — no spam.</p>
+            </div>
+            <NewsletterForm />
+          </div>
+        </Container>
+      </div>
       <div className="border-t border-ink-200 dark:border-ink-900">
         <Container className="flex flex-col items-center justify-between gap-4 py-6 text-xs text-ink-500 dark:text-ink-500 md:flex-row">
           <p>© {new Date().getFullYear()} {name}. All rights reserved.{licenseNumber && ` License #${licenseNumber}.`}</p>
