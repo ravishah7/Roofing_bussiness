@@ -3,8 +3,8 @@ import slugify from 'slugify'
 
 const categorySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true, unique: true, maxlength: 60 },
-    slug: { type: String, unique: true, lowercase: true, index: true },
+    name: { type: String, required: true, trim: true, maxlength: 60 },
+    slug: { type: String, lowercase: true, index: true },
     description: { type: String, trim: true, maxlength: 300 },
     type: {
       type: String,
@@ -16,8 +16,9 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-// NOTE: no `next` param — see Blog.model.js for why (Mongoose 9's Kareem
-// never passes one; calling next() throws TypeError).
+// Compound unique: "Residential" can exist as both project + gallery category
+categorySchema.index({ name: 1, type: 1 }, { unique: true })
+
 categorySchema.pre('validate', function generateSlug() {
   if (this.name && (this.isModified('name') || !this.slug)) {
     this.slug = slugify(this.name, { lower: true, strict: true })

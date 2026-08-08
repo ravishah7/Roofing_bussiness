@@ -1,9 +1,4 @@
-/**
- * Seeds default categories for projects, gallery albums, and blog posts.
- * Safe to re-run — skips any category that already exists by name+type.
- *
- * Run with:  node scripts/seedCategories.js
- */
+
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -35,27 +30,16 @@ const CATEGORIES = [
 
 async function seed() {
   await connectDB()
-
-  let created = 0
-  let skipped = 0
-
+  let created = 0, skipped = 0
   for (const cat of CATEGORIES) {
     const exists = await Category.findOne({ name: cat.name, type: cat.type })
-    if (exists) {
-      console.log(`[skip]    ${cat.type} / "${cat.name}" already exists`)
-      skipped++
-    } else {
-      await Category.create(cat)
-      console.log(`[created] ${cat.type} / "${cat.name}"`)
-      created++
-    }
+    if (exists) { console.log(`[skip] ${cat.type} / "${cat.name}"`); skipped++; continue }
+    await Category.create(cat)
+    console.log(`[created] ${cat.type} / "${cat.name}"`)
+    created++
   }
-
   console.log(`\nDone — ${created} created, ${skipped} skipped.`)
   await mongoose.disconnect()
 }
 
-seed().catch((err) => {
-  console.error('[seed] Failed:', err)
-  process.exit(1)
-})
+seed().catch((err) => { console.error(err); process.exit(1) })
