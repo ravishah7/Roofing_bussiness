@@ -8,11 +8,7 @@ import { seoSchema } from './seoSubschema.js'
 const settingsSchema = new mongoose.Schema(
   {
     singletonKey: { type: String, default: 'main', unique: true },
-    homeBeforeAfter: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project',
-      default: null,
-    },
+
     business: {
       name: { type: String, default: 'Summit Roof Co.' },
       tagline: { type: String, default: '' },
@@ -83,6 +79,12 @@ const settingsSchema = new mongoose.Schema(
     },
 
     seo: seoSchema,
+
+    homeBeforeAfter: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Project',
+      default: null,
+    },
 
     maintenanceMode: { type: Boolean, default: false },
   },

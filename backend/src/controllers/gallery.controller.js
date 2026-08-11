@@ -5,6 +5,11 @@ import asyncHandler from '../utils/asyncHandler.js'
 import ApiFeatures from '../utils/apiFeatures.js'
 import { uploadBuffer, deleteAsset } from '../services/cloudinary.service.js'
 import { idOrSlugFilter } from '../utils/findByIdOrSlug.js'
+import Media from '../models/Media.model.js'
+
+async function trackMedia(uploaded, adminId) {
+  try { await Media.create({ url: uploaded.secure_url, publicId: uploaded.public_id, fileName: uploaded.original_filename || uploaded.public_id.split('/').pop(), format: uploaded.format, resourceType: uploaded.resource_type, size: uploaded.bytes, width: uploaded.width, height: uploaded.height, folder: uploaded.folder || 'roofing-cms', uploadedBy: adminId }) } catch { }
+}
 
 export const getAllAlbums = asyncHandler(async (req, res) => {
   const baseFilter = req.admin ? {} : { status: 'published' }
@@ -36,10 +41,12 @@ export const createAlbum = asyncHandler(async (req, res) => {
   if (files.coverImage?.[0]) {
     const uploaded = await uploadBuffer(files.coverImage[0].buffer, { folder: 'roofing-cms/gallery' })
     payload.coverImage = { url: uploaded.secure_url, publicId: uploaded.public_id, alt: req.body.title }
+    await trackMedia(uploaded, req.admin._id)
   }
   if (files.images?.length) {
     const uploaded = await Promise.all(files.images.map((f) => uploadBuffer(f.buffer, { folder: 'roofing-cms/gallery' })))
     payload.images = uploaded.map((u) => ({ url: u.secure_url, publicId: u.public_id, alt: '', caption: '' }))
+    await Promise.all(uploaded.map((u) => trackMedia(u, req.admin._id)))
   }
 
   const album = await Album.create(payload)
@@ -55,10 +62,12 @@ export const updateAlbum = asyncHandler(async (req, res) => {
     if (album.coverImage?.publicId) await deleteAsset(album.coverImage.publicId).catch(() => null)
     const uploaded = await uploadBuffer(files.coverImage[0].buffer, { folder: 'roofing-cms/gallery' })
     req.body.coverImage = { url: uploaded.secure_url, publicId: uploaded.public_id, alt: req.body.title || album.title }
+    await trackMedia(uploaded, req.admin._id)
   }
   if (files.images?.length) {
     const uploaded = await Promise.all(files.images.map((f) => uploadBuffer(f.buffer, { folder: 'roofing-cms/gallery' })))
     req.body.images = [...album.images, ...uploaded.map((u) => ({ url: u.secure_url, publicId: u.public_id, alt: '', caption: '' }))]
+    await Promise.all(uploaded.map((u) => trackMedia(u, req.admin._id)))
   }
 
   Object.assign(album, req.body)

@@ -36,7 +36,8 @@ export default function BlogForm() {
   const [preview, setPreview] = useState(null)
 
   const { data: existing, isLoading } = useResourceItem('blogs', isEdit ? id : null)
-  const { data: categoriesRes } = useResourceList('categories', { type: 'blog', limit: 100 })
+  const { data: categoriesRes } = useResourceList('categories', { limit: 100, sort: 'name', type: 'blog' })
+  const categories = categoriesRes?.data || []
   const createBlog = useCreateResource('blogs', { successMessage: 'Blog post created' })
   const updateBlog = useUpdateResource('blogs', { successMessage: 'Blog post updated' })
 
@@ -45,7 +46,10 @@ export default function BlogForm() {
     formState: { errors, isDirty },
   } = useForm({
     resolver: zodResolver(blogSchema),
-    defaultValues: { title: '', excerpt: '', content: '', category: '', tags: '', status: 'draft', metaTitle: '', metaDescription: '' },
+    defaultValues: {
+      title: '', excerpt: '', content: '', category: '',
+      tags: '', status: 'draft', metaTitle: '', metaDescription: '',
+    },
   })
 
   useUnsavedChangesWarning(isDirty)
@@ -56,7 +60,9 @@ export default function BlogForm() {
         title: existing.title,
         excerpt: existing.excerpt || '',
         content: existing.content,
-        category: existing.category?._id || '',
+        category: typeof existing.category === 'object'
+          ? existing.category?._id || ''
+          : existing.category || '',
         tags: (existing.tags || []).join(', '),
         status: existing.status,
         metaTitle: existing.seo?.metaTitle || '',
@@ -108,9 +114,7 @@ export default function BlogForm() {
 
   const saving = createBlog.isPending || updateBlog.isPending
 
-  if (isEdit && isLoading) {
-    return <div className="skeleton h-96 w-full rounded-2xl" />
-  }
+  if (isEdit && isLoading) return <div className="skeleton h-96 w-full rounded-2xl" />
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -120,12 +124,8 @@ export default function BlogForm() {
         actions={
           <>
             <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => navigate('/blog')}>Back</Button>
-            <Button type="submit" variant="secondary" icon={Save} loading={saving} onClick={() => setValue('status', 'draft')}>
-              Save Draft
-            </Button>
-            <Button type="submit" icon={Send} loading={saving} onClick={() => setValue('status', 'published')}>
-              Publish
-            </Button>
+            <Button type="submit" variant="secondary" icon={Save} loading={saving} onClick={() => setValue('status', 'draft')}>Save Draft</Button>
+            <Button type="submit" icon={Send} loading={saving} onClick={() => setValue('status', 'published')}>Publish</Button>
           </>
         }
       />
@@ -140,11 +140,9 @@ export default function BlogForm() {
               <p className="-mt-3 text-xs text-slate-400">
                 Slug preview: <span className="font-mono text-slate-500 dark:text-slate-400">/blog/{slug || '...'}</span>
               </p>
-
               <FormField label="Excerpt" error={errors.excerpt?.message} hint="Shown in blog listing cards (max 300 characters)">
                 <Textarea rows={2} placeholder="A short summary of the post..." {...register('excerpt')} error={!!errors.excerpt} />
               </FormField>
-
               <FormField label="Content" error={errors.content?.message} required>
                 <Controller
                   name="content"
@@ -167,7 +165,6 @@ export default function BlogForm() {
               <FormField label="Meta Description" hint={`${metaDescription?.length || 0}/160`}>
                 <Textarea rows={2} placeholder="Defaults to excerpt" {...register('metaDescription')} />
               </FormField>
-
               <div className="rounded-xl border border-slate-100 p-4 dark:border-slate-800">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Search preview</p>
                 <p className="truncate text-sm text-brand-600 dark:text-brand-400">summitroofco.com/blog/{slug || '...'}</p>
@@ -191,8 +188,8 @@ export default function BlogForm() {
               </FormField>
               <FormField label="Category">
                 <Select {...register('category')}>
-                  <option value="">Uncategorized</option>
-                  {(categoriesRes?.data || []).map((c) => (
+                  <option value="">— No category —</option>
+                  {categories.map((c) => (
                     <option key={c._id} value={c._id}>{c.name}</option>
                   ))}
                 </Select>

@@ -6,7 +6,16 @@ export const blogValidator = [
   body('excerpt').optional().isLength({ max: 300 }),
   body('status').optional().isIn(['draft', 'published', 'archived']),
   body('category').optional().isMongoId().withMessage('Invalid category id'),
-  body('tags').optional().isArray().withMessage('Tags must be an array'),
+  body('tags')
+    .optional()
+    .customSanitizer((value) => {
+      if (Array.isArray(value)) return value
+      if (typeof value === 'string') {
+        try { return JSON.parse(value) } catch { return value.split(',').map(t => t.trim()).filter(Boolean) }
+      }
+      return value
+    })
+    .isArray().withMessage('Tags must be an array'),
 ]
 
 export const commentValidator = [

@@ -8,6 +8,7 @@ import App from './App.jsx'
 import './index.css'
 
 const queryClient = new QueryClient()
+
 async function applyDynamicFavicon() {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || '/api'
@@ -23,7 +24,7 @@ async function applyDynamicFavicon() {
       }
     }
   } catch {
-    
+    // silently fall back to the static favicon in index.html
   }
 }
 

@@ -7,8 +7,11 @@ import { uploadBuffer, deleteAsset } from '../services/cloudinary.service.js'
  * GET /settings — public (site needs it for header/footer/contact info)
  */
 export const getSettings = asyncHandler(async (req, res) => {
-  const settings = await Settings.getSingleton()
-  res.status(200).json(new ApiResponse(200, settings, 'Settings fetched'))
+  const settings = await Settings.getSingleton().then
+    ? await Settings.getSingleton()
+    : Settings.getSingleton()
+  const populated = await Settings.findById(settings._id).populate('homeBeforeAfter', 'title slug beforeImages afterImages')
+  res.status(200).json(new ApiResponse(200, populated, 'Settings fetched'))
 })
 
 /**
@@ -60,12 +63,14 @@ export const updateFavicon = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, settings, 'Favicon updated'))
 })
+
 export const setHomeBeforeAfter = asyncHandler(async (req, res) => {
   const { projectId } = req.body
+  const Settings = (await import('../models/Settings.model.js')).default
   const settings = await Settings.findOneAndUpdate(
     {},
     { homeBeforeAfter: projectId || null },
     { new: true, upsert: true }
   )
-  res.status(200).json(new ApiResponse(200, settings, 'Home slider updated'))
+  res.status(200).json(new ApiResponse(200, settings, 'Home before/after slider updated'))
 })

@@ -6,11 +6,19 @@ import ApiFeatures from '../utils/apiFeatures.js'
 import { uploadBuffer, deleteAsset } from '../services/cloudinary.service.js'
 import { parseJsonField } from '../utils/parseJsonField.js'
 import { idOrSlugFilter } from '../utils/findByIdOrSlug.js'
+import Media from '../models/Media.model.js'
+
+async function trackMedia(uploaded, adminId) {
+  try {
+    await Media.create({ url: uploaded.secure_url, publicId: uploaded.public_id, fileName: uploaded.original_filename || uploaded.public_id.split('/').pop(), format: uploaded.format, resourceType: uploaded.resource_type, size: uploaded.bytes, width: uploaded.width, height: uploaded.height, folder: uploaded.folder || 'roofing-cms', uploadedBy: adminId })
+  } catch { }
+}
 
 const SEARCH_FIELDS = ['title', 'description']
 
-async function uploadMany(files = [], folder) {
+async function uploadMany(files = [], folder, adminId) {
   const uploaded = await Promise.all(files.map((f) => uploadBuffer(f.buffer, { folder })))
+  if (adminId) await Promise.all(uploaded.map((u) => trackMedia(u, adminId)))
   return uploaded.map((u) => ({ url: u.secure_url, publicId: u.public_id, alt: '' }))
 }
 
@@ -48,12 +56,12 @@ export const createProject = asyncHandler(async (req, res) => {
   if (payload.customerReview !== undefined) payload.customerReview = parseJsonField(payload.customerReview)
 
   if (files.coverImage?.[0]) {
-    const [uploaded] = await uploadMany(files.coverImage, 'roofing-cms/projects')
+    const [uploaded] = await uploadMany(files.coverImage, 'roofing-cms/projects', req.admin._id)
     payload.coverImage = uploaded
   }
-  if (files.gallery?.length) payload.gallery = await uploadMany(files.gallery, 'roofing-cms/projects/gallery')
-  if (files.beforeImages?.length) payload.beforeImages = await uploadMany(files.beforeImages, 'roofing-cms/projects/before')
-  if (files.afterImages?.length) payload.afterImages = await uploadMany(files.afterImages, 'roofing-cms/projects/after')
+  if (files.gallery?.length) payload.gallery = await uploadMany(files.gallery, 'roofing-cms/projects/gallery', req.admin._id)
+  if (files.beforeImages?.length) payload.beforeImages = await uploadMany(files.beforeImages, 'roofing-cms/projects/before', req.admin._id)
+  if (files.afterImages?.length) payload.afterImages = await uploadMany(files.afterImages, 'roofing-cms/projects/after', req.admin._id)
 
   const project = await Project.create(payload)
   res.status(201).json(new ApiResponse(201, project, 'Project created'))
@@ -70,17 +78,17 @@ export const updateProject = asyncHandler(async (req, res) => {
 
   if (files.coverImage?.[0]) {
     if (project.coverImage?.publicId) await deleteAsset(project.coverImage.publicId).catch(() => null)
-    const [uploaded] = await uploadMany(files.coverImage, 'roofing-cms/projects')
+    const [uploaded] = await uploadMany(files.coverImage, 'roofing-cms/projects', req.admin._id)
     req.body.coverImage = uploaded
   }
   if (files.gallery?.length) {
-    req.body.gallery = [...project.gallery, ...(await uploadMany(files.gallery, 'roofing-cms/projects/gallery'))]
+    req.body.gallery = [...project.gallery, ...(await uploadMany(files.gallery, 'roofing-cms/projects/gallery', req.admin._id))]
   }
   if (files.beforeImages?.length) {
-    req.body.beforeImages = [...project.beforeImages, ...(await uploadMany(files.beforeImages, 'roofing-cms/projects/before'))]
+    req.body.beforeImages = [...project.beforeImages, ...(await uploadMany(files.beforeImages, 'roofing-cms/projects/before', req.admin._id))]
   }
   if (files.afterImages?.length) {
-    req.body.afterImages = [...project.afterImages, ...(await uploadMany(files.afterImages, 'roofing-cms/projects/after'))]
+    req.body.afterImages = [...project.afterImages, ...(await uploadMany(files.afterImages, 'roofing-cms/projects/after', req.admin._id))]
   }
 
   Object.assign(project, req.body)

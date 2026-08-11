@@ -1,4 +1,3 @@
-
 export function parseJsonField(value) {
   if (typeof value !== 'string') return value
   try {

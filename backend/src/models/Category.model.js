@@ -16,7 +16,7 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-// Compound unique: "Residential" can exist as both project + gallery category
+// Compound unique: "Residential" can exist as both project + gallery
 categorySchema.index({ name: 1, type: 1 }, { unique: true })
 
 categorySchema.pre('validate', function generateSlug() {

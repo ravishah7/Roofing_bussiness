@@ -1,9 +1,13 @@
-
+/**
+ * Seeds default categories for projects, gallery albums, and blog posts.
+ * Safe to re-run — skips any category that already exists by name+type.
+ *
+ * Run with:  node scripts/seedCategories.js
+ */
 import dotenv from 'dotenv'
 dotenv.config()
 
 import mongoose from 'mongoose'
-import { env } from '../src/config/env.js'
 import connectDB from '../src/config/db.js'
 import Category from '../src/models/Category.model.js'
 
@@ -25,21 +29,31 @@ const CATEGORIES = [
   { name: 'Maintenance Tips',      type: 'blog', description: 'How to care for and extend the life of your roof' },
   { name: 'Insurance & Claims',    type: 'blog', description: 'Navigating storm damage claims and insurance' },
   { name: 'Materials Guide',       type: 'blog', description: 'Shingles, metal, tile — which is right for you?' },
-  { name: 'Company News',          type: 'blog', description: 'Updates from the Summit Roof Co. team' },
+  { name: 'Company News',          type: 'blog', description: 'Updates from the team' },
+  { name: 'Tips & Advice',         type: 'blog', description: 'General roofing tips and homeowner advice' },
 ]
 
 async function seed() {
   await connectDB()
   let created = 0, skipped = 0
+
   for (const cat of CATEGORIES) {
     const exists = await Category.findOne({ name: cat.name, type: cat.type })
-    if (exists) { console.log(`[skip] ${cat.type} / "${cat.name}"`); skipped++; continue }
-    await Category.create(cat)
-    console.log(`[created] ${cat.type} / "${cat.name}"`)
-    created++
+    if (exists) {
+      console.log(`[skip]    ${cat.type} / "${cat.name}"`)
+      skipped++
+    } else {
+      await Category.create(cat)
+      console.log(`[created] ${cat.type} / "${cat.name}"`)
+      created++
+    }
   }
+
   console.log(`\nDone — ${created} created, ${skipped} skipped.`)
   await mongoose.disconnect()
 }
 
-seed().catch((err) => { console.error(err); process.exit(1) })
+seed().catch((err) => {
+  console.error('[seed] Failed:', err.message)
+  process.exit(1)
+})
