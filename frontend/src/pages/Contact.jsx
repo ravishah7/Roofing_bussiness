@@ -32,6 +32,61 @@ export default function Contact() {
 
       <section className="bg-white py-20 dark:bg-ink-950 md:py-28">
         <Container className="grid grid-cols-1 gap-12 lg:grid-cols-5">
+          
+          <div className="lg:col-span-3">
+            <div className="rounded-3xl border border-ink-100 p-8 dark:border-ink-800 md:p-10">
+              {status === 'success' ? (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center py-12 text-center">
+                  <CheckCircle2 className="h-14 w-14 text-ember-500" />
+                  <h3 className="mt-4 font-display text-2xl font-semibold text-ink-900 dark:text-white">Message sent</h3>
+                  <p className="mt-2 max-w-sm text-ink-600 dark:text-ink-400">
+                    Thanks for reaching out — a member of our team will contact you within one business day.
+                  </p>
+                  <Button variant="outline" className="mt-6" onClick={() => setStatus('idle')}>Send another message</Button>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Full Name</label>
+                    <input {...register('name', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="Jane Doe" />
+                    {errors.name && <p className="mt-1 text-xs text-red-500">Name is required</p>}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Phone</label>
+                    <input {...register('phone', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="(555) 123-4567" />
+                    {errors.phone && <p className="mt-1 text-xs text-red-500">Phone is required</p>}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Email</label>
+                    <input type="email" {...register('email', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="jane@email.com" />
+                    {errors.email && <p className="mt-1 text-xs text-red-500">Email is required</p>}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Service Needed</label>
+                    <select
+                      {...register('service')}
+                      className="mt-2 w-full rounded-xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 focus:border-ember-500 focus:outline-none dark:border-ink-700 dark:bg-ink-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                    >
+                      <option>Free Roof Inspection</option>
+                      <option>Roof Repair</option>
+                      <option>Roof Replacement</option>
+                      <option>Emergency Service</option>
+                      <option>Commercial Roofing</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Message</label>
+                    <textarea {...register('message')} rows={4} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="Tell us about your project..." />
+                  </div>
+                  <Button type="submit" size="lg" className="sm:col-span-2 justify-center" disabled={status === 'loading'}>
+                    {status === 'loading' ? <><Loader2 className="h-4 w-4 animate-spin" /> Sending...</> : 'Send Message'}
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+
           <div className="lg:col-span-2">
             <div className="space-y-5">
               {[
@@ -71,56 +126,6 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="lg:col-span-3">
-            <div className="rounded-3xl border border-ink-100 p-8 dark:border-ink-800 md:p-10">
-              {status === 'success' ? (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center py-12 text-center">
-                  <CheckCircle2 className="h-14 w-14 text-ember-500" />
-                  <h3 className="mt-4 font-display text-2xl font-semibold text-ink-900 dark:text-white">Message sent</h3>
-                  <p className="mt-2 max-w-sm text-ink-600 dark:text-ink-400">
-                    Thanks for reaching out — a member of our team will contact you within one business day.
-                  </p>
-                  <Button variant="outline" className="mt-6" onClick={() => setStatus('idle')}>Send another message</Button>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div>
-                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Full Name</label>
-                    <input {...register('name', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="Jane Doe" />
-                    {errors.name && <p className="mt-1 text-xs text-red-500">Name is required</p>}
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Phone</label>
-                    <input {...register('phone', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="(555) 123-4567" />
-                    {errors.phone && <p className="mt-1 text-xs text-red-500">Phone is required</p>}
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Email</label>
-                    <input type="email" {...register('email', { required: true })} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="jane@email.com" />
-                    {errors.email && <p className="mt-1 text-xs text-red-500">Email is required</p>}
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Service Needed</label>
-                    <select {...register('service')} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700">
-                      <option>Free Roof Inspection</option>
-                      <option>Roof Repair</option>
-                      <option>Roof Replacement</option>
-                      <option>Emergency Service</option>
-                      <option>Commercial Roofing</option>
-                      <option>Other</option>
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="text-sm font-medium text-ink-700 dark:text-ink-300">Message</label>
-                    <textarea {...register('message')} rows={4} className="mt-2 w-full rounded-xl border border-ink-200 bg-transparent px-4 py-3 text-sm focus:border-ember-500 focus:outline-none dark:border-ink-700" placeholder="Tell us about your project..." />
-                  </div>
-                  <Button type="submit" size="lg" className="sm:col-span-2 justify-center" disabled={status === 'loading'}>
-                    {status === 'loading' ? <><Loader2 className="h-4 w-4 animate-spin" /> Sending...</> : 'Send Message'}
-                  </Button>
-                </form>
-              )}
-            </div>
-          </div>
         </Container>
       </section>
     </>

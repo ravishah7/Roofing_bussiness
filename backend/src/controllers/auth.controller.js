@@ -94,7 +94,7 @@ export const refresh = asyncHandler(async (req, res) => {
     throw ApiError.unauthorized('Invalid or expired refresh token')
   }
 
-  const admin = await Admin.findById(decoded.sub)
+  const admin = await Admin.findById(decoded.sub).select('+refreshTokens.token')
   if (!admin) throw ApiError.unauthorized('Admin no longer exists')
 
   const stored = admin.refreshTokens?.find((rt) => rt.token === token)

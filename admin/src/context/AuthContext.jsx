@@ -1,12 +1,12 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import api, { setAccessToken, setUnauthorizedHandler } from '@/lib/api'
-
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import api, { setAccessToken, setUnauthorizedHandler, refreshAccessToken } from '@/lib/api'
+ 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [admin, setAdmin] = useState(null)
   const [status, setStatus] = useState('checking') // checking | authenticated | unauthenticated
-
+ 
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout')
@@ -17,22 +17,22 @@ export function AuthProvider({ children }) {
     setAdmin(null)
     setStatus('unauthenticated')
   }, [])
-
+ 
   useEffect(() => {
     setUnauthorizedHandler(() => {
       setAdmin(null)
       setStatus('unauthenticated')
     })
   }, [])
-
-  // On mount: try to silently refresh using the httpOnly cookie so a page
-  // reload doesn't force a re-login while the refresh token is still valid.
+ 
+ 
+  const hasRunRef = useRef(false)
   useEffect(() => {
+ 
     let cancelled = false
     ;(async () => {
       try {
-        const { data } = await api.post('/auth/refresh')
-        setAccessToken(data.data.accessToken)
+        await refreshAccessToken()
         const me = await api.get('/auth/me')
         if (!cancelled) {
           setAdmin(me.data.data)
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
       cancelled = true
     }
   }, [])
-
+ 
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
     setAccessToken(data.data.accessToken)
@@ -54,13 +54,13 @@ export function AuthProvider({ children }) {
     setStatus('authenticated')
     return data.data.admin
   }, [])
-
+ 
   const refreshMe = useCallback(async () => {
     const { data } = await api.get('/auth/me')
     setAdmin(data.data)
     return data.data
   }, [])
-
+ 
   const value = {
     admin,
     status,
@@ -71,12 +71,13 @@ export function AuthProvider({ children }) {
     refreshMe,
     hasRole: (...roles) => admin && roles.includes(admin.role),
   }
-
+ 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
-
+ 
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
+ 

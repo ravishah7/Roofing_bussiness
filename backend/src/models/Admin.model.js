@@ -43,17 +43,6 @@ const adminSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-// No explicit adminSchema.index({ email: 1 }) here — `unique: true` on the
-// email field above already creates that index; adding both causes a
-// duplicate-index warning from Mongoose at startup.
-
-// NOTE: this must be a plain async function with NO `next` parameter.
-// Mixing `async` with a callback-style `next` argument confuses Mongoose's
-// hook dispatcher (Kareem) — it can't tell whether to wait for the
-// returned promise or for next() to be called, and next ends up not
-// being a usable callback (`TypeError: next is not a function`).
-// An async pre-hook signals completion by resolving/rejecting its
-// promise, not by calling next().
 adminSchema.pre('save', async function hashPassword() {
   if (!this.isModified('password')) return
   this.password = await bcrypt.hash(this.password, 12)
@@ -69,7 +58,7 @@ adminSchema.methods.changedPasswordAfter = function changedPasswordAfter(jwtTime
   const changedTimestamp = Math.floor(this.passwordChangedAt.getTime() / 1000)
   return jwtTimestamp < changedTimestamp
 }
-
+ 
 adminSchema.methods.createEmailVerificationToken = function createEmailVerificationToken() {
   const rawToken = crypto.randomBytes(32).toString('hex')
   this.emailVerificationToken = crypto.createHash('sha256').update(rawToken).digest('hex')
