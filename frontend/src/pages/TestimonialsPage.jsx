@@ -3,8 +3,11 @@ import Seo from '@/components/Seo'
 import PageHero from '@/components/ui/PageHero'
 import Container from '@/components/ui/Container'
 import FinalCta from '@/components/home/FinalCta'
+import VideoTestimonials from '@/components/testimonials/VideoTestimonials'
 import { useResourceList } from '@/hooks/useContentQueries'
+import { isValidYoutubeUrl } from '@/lib/youtube'
 import { TESTIMONIALS as FALLBACK_TESTIMONIALS } from '@/data/site'
+import Testimonials from '@/components/home/Testimonials'
 
 export default function TestimonialsPage() {
   const { data, isLoading, isError } = useResourceList('testimonials', { limit: 50, sort: '-isFeatured,-createdAt' })
@@ -14,40 +17,24 @@ export default function TestimonialsPage() {
   const testimonials = live?.length ? live : showFallback ? FALLBACK_TESTIMONIALS : []
   const showSkeleton = isLoading && testimonials.length === 0
 
+  const DEV_TEST_VIDEOS = [
+    { _id: 'test-1', name: 'Marianne Cole', location: 'Oak Park, IL', rating: 5, text: 'From the first inspection to the final walkthrough, the crew was precise and professional.', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+    { _id: 'test-2', name: 'David Huang', location: 'Naperville, IL', rating: 5, text: 'They handled our entire insurance claim after the hailstorm — zero stress on our end.', videoUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw' },
+    { _id: 'test-3', name: 'Priya Shah', location: 'Evanston, IL', rating: 5, text: 'Best contractor experience we have had on any home project, start to finish.', videoUrl: 'https://youtu.be/L_jWHffIx5E' },
+  ]
+  const allTestimonials = import.meta.env.DEV ? [...DEV_TEST_VIDEOS, ...testimonials] : testimonials
+
+  const videoTestimonials = allTestimonials.filter((t) => isValidYoutubeUrl(t.videoUrl))
+  const textTestimonials = allTestimonials.filter((t) => !isValidYoutubeUrl(t.videoUrl))
+
   return (
     <>
       <Seo title="Customer Reviews" description="Read what homeowners say about our roofing work." path="/testimonials" />
       <PageHero eyebrow="Reviews" title="What our customers are saying." crumb="Testimonials" />
-      <section className="bg-white py-20 dark:bg-ink-950 md:py-28">
-        <Container>
-          {showSkeleton ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 animate-pulse rounded-3xl border border-ink-100 bg-ink-50 dark:border-ink-800 dark:bg-ink-900/40" />
-              ))}
-            </div>
-          ) : testimonials.length === 0 ? (
-            <div className="flex flex-col items-center py-16 text-center">
-              <MessageSquareOff className="h-10 w-10 text-ink-300 dark:text-ink-600" />
-              <p className="mt-4 text-ink-500 dark:text-ink-400">No reviews published yet — check back soon.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {testimonials.map((t) => (
-                <div key={t._id || t.name} className="rounded-3xl border border-ink-100 p-8 dark:border-ink-800">
-                  <Quote className="h-7 w-7 text-ember-500" />
-                  <div className="mt-3 flex gap-0.5">
-                    {[...Array(t.rating)].map((_, j) => <Star key={j} className="h-4 w-4 fill-ember-500 text-ember-500" />)}
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-ink-600 dark:text-ink-400">{t.text}</p>
-                  <p className="mt-5 font-semibold text-ink-900 dark:text-white">{t.name}</p>
-                  <p className="text-xs text-ink-500 dark:text-ink-400">{t.location}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </Container>
-      </section>
+
+      {!showSkeleton && videoTestimonials.length > 0 && <VideoTestimonials videos={videoTestimonials} />}
+
+      <Testimonials  />  
       <FinalCta />
     </>
   )

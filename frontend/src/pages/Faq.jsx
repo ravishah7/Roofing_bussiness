@@ -8,7 +8,7 @@ import FinalCta from '@/components/home/FinalCta'
 import { useResourceList } from '@/hooks/useContentQueries'
 import { FAQS as FALLBACK_FAQS } from '@/data/site'
 
-export default function Faq() {
+export default function Faq() { 
   const [open, setOpen] = useState(0)
 
   const { data, isLoading, isError } = useResourceList('faqs', { limit: 100, sort: 'order' })
