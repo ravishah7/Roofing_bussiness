@@ -67,10 +67,23 @@ export const updateFavicon = asyncHandler(async (req, res) => {
 export const setHomeBeforeAfter = asyncHandler(async (req, res) => {
   const { projectId } = req.body
   const Settings = (await import('../models/Settings.model.js')).default
-  const settings = await Settings.findOneAndUpdate(
-    {},
-    { homeBeforeAfter: projectId || null },
-    { new: true, upsert: true }
-  )
+  const settings = await Settings.findOneAndUpdate({}, { homeBeforeAfter: projectId || null }, { new: true, upsert: true })
   res.status(200).json(new ApiResponse(200, settings, 'Home before/after slider updated'))
+})
+
+export const updateLegalContent = asyncHandler(async (req, res) => {
+  const { privacyPolicy, termsOfService } = req.body
+  const settings = await Settings.getSingleton()
+
+  if (privacyPolicy !== undefined) {
+    settings.legalContent.privacyPolicy = privacyPolicy
+    settings.legalContent.privacyUpdatedAt = new Date()
+  }
+  if (termsOfService !== undefined) {
+    settings.legalContent.termsOfService = termsOfService
+    settings.legalContent.termsUpdatedAt = new Date()
+  }
+
+  await settings.save()
+  res.status(200).json(new ApiResponse(200, settings, 'Legal content updated'))
 })

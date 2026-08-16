@@ -207,8 +207,19 @@ export default function ProjectForm() {
             <CardHeader><CardTitle>Services Used</CardTitle></CardHeader>
             <CardContent className="max-h-64 space-y-1 overflow-y-auto">
               {(servicesRes?.data || []).map((s) => (
-                <label key={s._id} className={cn('flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm', servicesUsed.includes(s._id) ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800')}>
-                  <input type="checkbox" checked={servicesUsed.includes(s._id)} onChange={() => toggleService(s._id)} className="h-3.5 w-3.5 rounded border-slate-300 text-brand-500" />
+                <label
+                  key={s._id}
+                  htmlFor={`service-${s._id}`}
+                  className={cn('flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm', servicesUsed.includes(s._id) ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400' : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800')}
+                >
+                  <input
+                    id={`service-${s._id}`}
+                    name={`service-${s._id}`}
+                    type="checkbox"
+                    checked={servicesUsed.includes(s._id)}
+                    onChange={() => toggleService(s._id)}
+                    className="h-3.5 w-3.5 rounded border-slate-300 text-brand-500"
+                  />
                   {s.title}
                 </label>
               ))}

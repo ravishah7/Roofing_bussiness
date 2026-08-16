@@ -38,8 +38,8 @@ export default function Home() {
       <ProcessSteps />
       <ProjectsPreview />
       <Testimonials />
-      <FinancingBanner />
-      <EmergencyBanner />
+      {/* <FinancingBanner /> */}
+      {/* <EmergencyBanner /> */}
       <FaqPreview />
       <FinalCta />
     </>

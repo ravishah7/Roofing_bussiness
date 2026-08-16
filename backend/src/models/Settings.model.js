@@ -8,7 +8,12 @@ import { seoSchema } from './seoSubschema.js'
 const settingsSchema = new mongoose.Schema(
   {
     singletonKey: { type: String, default: 'main', unique: true },
-
+    legalContent: {
+      privacyPolicy: { type: String, default: '' },
+      termsOfService: { type: String, default: '' },
+      privacyUpdatedAt: { type: Date },
+      termsUpdatedAt: { type: Date },
+    },
     business: {
       name: { type: String, default: 'Summit Roof Co.' },
       tagline: { type: String, default: '' },

@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Newspaper, FolderKanban, Wrench, MessageSquareQuote,
   HelpCircle, Images, Mail, Send, LibraryBig, Settings, Search as SearchIcon,
-  User, Activity,
+  User, Activity, FileText,
 } from 'lucide-react'
 
 export const NAV_SECTIONS = [
@@ -12,7 +12,7 @@ export const NAV_SECTIONS = [
   {
     label: 'Content',
     items: [
-      { label: 'Blog', to: '/blog', icon: Newspaper, roles: ['super_admin', 'admin', 'editor'] },
+      // { label: 'Blog', to: '/blog', icon: Newspaper, roles: ['super_admin', 'admin', 'editor'] },
       { label: 'Projects', to: '/projects', icon: FolderKanban, roles: ['super_admin', 'admin', 'editor'] },
       { label: 'Services', to: '/services', icon: Wrench, roles: ['super_admin', 'admin', 'editor'] },
       { label: 'Testimonials', to: '/testimonials', icon: MessageSquareQuote, roles: ['super_admin', 'admin', 'editor'] },
@@ -34,6 +34,7 @@ export const NAV_SECTIONS = [
       { label: 'Activity Log', to: '/activity', icon: Activity, roles: ['super_admin', 'admin', 'editor'] },
       { label: 'Website Settings', to: '/settings', icon: Settings, roles: ['super_admin', 'admin'] },
       { label: 'SEO Settings', to: '/settings/seo', icon: SearchIcon, roles: ['super_admin', 'admin'] },
+      { label: 'Legal Content', to: '/settings/legal', icon: FileText, roles: ['super_admin', 'admin'] },
       { label: 'Admin Users', to: '/users', icon: User, roles: ['super_admin'] },
     ],
   },

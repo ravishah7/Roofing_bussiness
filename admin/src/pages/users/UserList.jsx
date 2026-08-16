@@ -65,13 +65,40 @@ export default function UserList() {
                   <p className="font-medium text-slate-800 dark:text-slate-100">{u.name} {u._id === me?._id && <span className="text-xs text-slate-400">(you)</span>}</p>
                   <p className="text-xs text-slate-400">{u.email} · Joined {formatDate(u.createdAt)}</p>
                 </div>
-                <Select value={u.role} disabled={u._id === me?._id || u.role === 'super_admin'} onChange={(e) => updateUser.mutate({ id: u._id, data: { role: e.target.value } })} className="w-36">
-                  <option value="super_admin" disabled>Super Admin</option>
-                  <option value="admin">Admin</option>
-                  <option value="editor">Editor</option>
-                </Select>
-                <label className="flex items-center gap-2 text-xs text-slate-500">
-                  <input type="checkbox" checked={u.isActive} disabled={u._id === me?._id} onChange={(e) => updateUser.mutate({ id: u._id, data: { isActive: e.target.checked } })} className="h-3.5 w-3.5 rounded border-slate-300" />
+                <Select
+                    id={`role-${u._id}`}
+                    name={`role-${u._id}`}
+                    value={u.role}
+                    disabled={u._id === me?._id || u.role === 'super_admin'}
+                    onChange={(e) => updateUser.mutate({ id: u._id, data: { role: e.target.value } })}
+                    className="w-36"
+                  >
+                    <option value="super_admin" disabled>Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="editor">Editor</option>
+                  </Select>
+                  <label htmlFor={`active-${u._id}`} className="flex items-center gap-2 text-xs text-slate-500">
+                    <input
+                      id={`active-${u._id}`}
+                      name={`active-${u._id}`}
+                      type="checkbox"
+                      checked={u.isActive}
+                      disabled={u._id === me?._id}
+                      onChange={(e) => updateUser.mutate({ id: u._id, data: { isActive: e.target.checked } })}
+                      className="h-3.5 w-3.5 rounded border-slate-300"
+                    />
+                    Active
+                  </label>
+                <label htmlFor={`active-${u._id}`} className="flex items-center gap-2 text-xs text-slate-500">
+                  <input
+                    id={`active-${u._id}`}
+                    name={`active-${u._id}`}
+                    type="checkbox"
+                    checked={u.isActive}
+                    disabled={u._id === me?._id}
+                    onChange={(e) => updateUser.mutate({ id: u._id, data: { isActive: e.target.checked } })}
+                    className="h-3.5 w-3.5 rounded border-slate-300"
+                  />
                   Active
                 </label>
                 <button

@@ -12,5 +12,6 @@ router.patch('/home-before-after', settingsController.setHomeBeforeAfter)
 router.patch('/', settingsController.updateSettings)
 router.patch('/logo', uploadImage.single('logo'), settingsController.updateLogo)
 router.patch('/favicon', uploadImage.single('favicon'), settingsController.updateFavicon)
+router.patch('/legal', settingsController.updateLegalContent)
 
 export default router

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import { Phone, Mail, MapPin, Clock, Siren, CheckCircle2, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 import Seo from '@/components/Seo'
 import PageHero from '@/components/ui/PageHero'
 import Container from '@/components/ui/Container'
@@ -16,13 +17,19 @@ export default function Contact() {
   const addressStr = [address.street, [address.city, address.state, address.zip].filter(Boolean).join(', ')].filter(Boolean).join(', ')
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
   const [status, setStatus] = useState('idle')
+  const [submitError, setSubmitError] = useState('')
 
   const onSubmit = async (data) => {
     setStatus('loading')
-    // API integration point: axios.post('/api/contact-messages', data)
-    await new Promise((r) => setTimeout(r, 1200))
-    setStatus('success')
-    reset()
+    setSubmitError('')
+    try {
+      await api.post('/contact', data)
+      setStatus('success')
+      reset()
+    } catch (err) {
+      setStatus('idle')
+      setSubmitError(err.response?.data?.message || 'Something went wrong — please try again.')
+    }
   }
 
   return (

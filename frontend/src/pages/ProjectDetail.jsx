@@ -17,6 +17,7 @@ import { useResourceItem, useResourceList } from '@/hooks/useContentQueries'
 import { normalizeProject } from '@/lib/normalizeProject'
 import { PROJECTS as FALLBACK_PROJECTS } from '@/data/site'
 import NotFound from './NotFound'
+import GoogleReviewCard from '@/components/testimonials/GoogleReviewCard'
 
 function slugify(str) {
   return (str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -176,7 +177,7 @@ export default function ProjectDetail() {
         <section className="bg-white py-24 dark:bg-ink-950 md:py-28">
           <Container>
             <SectionHeading eyebrow="Gallery" title="Every angle." />
-            <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
+            <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {galleryUrls.map((url, i) => (
                 <motion.button
                   key={url + i}
@@ -184,9 +185,14 @@ export default function ProjectDetail() {
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
                   onClick={() => setLightboxIndex(i)}
-                  className="block w-full overflow-hidden rounded-2xl"
+                  className="block aspect-square w-full overflow-hidden rounded-2xl"
                 >
-                  <img src={url} alt={`${project.title} photo ${i + 1}`} loading="lazy" className="w-full transition-transform duration-500 hover:scale-105" />
+                  <img
+                    src={url}
+                    alt={`${project.title} photo ${i + 1}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                  />
                 </motion.button>
               ))}
             </div>
@@ -209,25 +215,18 @@ export default function ProjectDetail() {
       {/* Customer review */}
       {project.customerReview?.text && (
         <section className="bg-ink-950 py-24 md:py-28">
-          <Container className="max-w-2xl text-center">
-            <Quote className="mx-auto h-9 w-9 text-ember-500" />
-            {project.customerReview.rating && (
-              <div className="mt-4 flex justify-center gap-1">
-                {[...Array(project.customerReview.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-ember-500 text-ember-500" />
-                ))}
-              </div>
-            )}
-            <p className="mt-6 text-balance font-display text-2xl font-medium leading-snug text-white md:text-3xl">
-              "{project.customerReview.text}"
-            </p>
-            {project.customerReview.name && (
-              <p className="mt-6 text-sm font-medium text-ink-400">— {project.customerReview.name}</p>
-            )}
+          <Container className="max-w-xl">
+            <GoogleReviewCard
+              testimonial={{
+                name: project.customerReview.name || 'Verified Customer',
+                location: project.location,
+                rating: project.customerReview.rating,
+                text: project.customerReview.text,
+              }}
+            />
           </Container>
         </section>
       )}
-
       {/* Related projects */}
       {related.length > 0 && (
         <section className="bg-white py-24 dark:bg-ink-950 md:py-28">

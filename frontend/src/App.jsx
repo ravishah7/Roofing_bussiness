@@ -38,8 +38,8 @@ export default function App() {
           <Route path="/projects/:slug" element={<ProjectDetail />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/gallery/:slug" element={<AlbumDetail />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
+          {/* <Route path="/blog" element={<Blog />} /> */}
+          {/* <Route path="/blog/:slug" element={<BlogPost />} /> */}
           <Route path="/testimonials" element={<TestimonialsPage />} />
           <Route path="/service-areas" element={<ServiceAreas />} />
           <Route path="/financing" element={<Financing />} />

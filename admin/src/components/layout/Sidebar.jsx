@@ -14,7 +14,7 @@ function SidebarContent({ collapsed, onNavigate }) {
       <div className={cn('flex h-16 shrink-0 items-center border-b border-slate-100 px-5 dark:border-slate-800', collapsed && 'justify-center px-0')}>
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-white">S</span>
-          {!collapsed && <span className="text-sm font-semibold text-slate-900 dark:text-white">Summit CMS</span>}
+          {!collapsed && <span className="text-sm font-semibold text-slate-900 dark:text-white">Roofing CMS</span>}
         </div>
       </div>
 

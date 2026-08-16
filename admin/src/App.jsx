@@ -30,6 +30,7 @@ const ChangePassword = lazy(() => import('@/pages/profile/ChangePassword'))
 const UserList = lazy(() => import('@/pages/users/UserList'))
 const ActivityLog = lazy(() => import('@/pages/activity/ActivityLog'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
+const LegalSettings = lazy(() => import('@/pages/settings/LegalSettings'))
 
 function PageLoader() {
   return (
@@ -83,6 +84,7 @@ export default function App() {
 
           <Route path="/settings" element={<WebsiteSettings />} />
           <Route path="/settings/seo" element={<SeoSettings />} />
+          <Route path="/settings/legal" element={<LegalSettings />} />
 
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/password" element={<ChangePassword />} />

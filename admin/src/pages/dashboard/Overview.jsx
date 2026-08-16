@@ -2,13 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import {
-  Newspaper, FolderKanban, MessageSquareQuote, Mail, ArrowUpRight,
-  FilePlus2, FolderPlus, MessageSquarePlus, ImagePlus,
+  FolderKanban, MessageSquareQuote, Mail, ArrowUpRight,
+  FolderPlus, MessageSquarePlus,
 } from 'lucide-react'
 import api from '@/lib/api'
 import StatCard from '@/components/ui/StatCard'
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
-import StatusBadge from '@/components/ui/StatusBadge'
 import EmptyState from '@/components/ui/EmptyState'
 import { timeAgo, formatDate } from '@/lib/utils'
 
@@ -28,16 +27,9 @@ export default function Overview() {
     queryFn: async () => (await api.get('/dashboard/recent-contacts', { params: { limit: 5 } })).data.data,
   })
 
-  const { data: recentBlogs } = useQuery({
-    queryKey: ['dashboard', 'recent-blogs'],
-    queryFn: async () => (await api.get('/dashboard/recent-blogs', { params: { limit: 5 } })).data.data,
-  })
-
   const quickActions = [
-    { label: 'New Blog Post', to: '/blog/create', icon: FilePlus2 },
     { label: 'New Project', to: '/projects/create', icon: FolderPlus },
     { label: 'Add Testimonial', to: '/testimonials', icon: MessageSquarePlus },
-    { label: 'Upload Media', to: '/media', icon: ImagePlus },
   ]
 
   return (
@@ -47,9 +39,7 @@ export default function Overview() {
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Here's what's happening across your website.</p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard loading={statsLoading} label="Published Posts" value={stats?.blogs.published || 0} icon={Newspaper} tone="brand" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard loading={statsLoading} label="Total Projects" value={stats?.projects.total || 0} icon={FolderKanban} tone="info" />
         <StatCard loading={statsLoading} label="Pending Testimonials" value={stats?.testimonials.pending || 0} icon={MessageSquareQuote} tone="warning" />
         <StatCard loading={statsLoading} label="New Messages" value={stats?.contacts.new || 0} icon={Mail} tone="danger" />
@@ -111,8 +101,8 @@ export default function Overview() {
         </Card>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent messages */}
+      {/* Recent messages */}
+      <div className="mt-6">
         <Card>
           <CardHeader>
             <CardTitle>Recent Messages</CardTitle>
@@ -123,46 +113,19 @@ export default function Overview() {
           <CardContent className="p-0">
             {contactsLoading ? (
               <div className="space-y-4 p-6">
-                {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-12 w-full rounded-lg" />)}
+                {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-12 rounded-lg" />)}
               </div>
             ) : !recentContacts?.length ? (
               <EmptyState title="No messages yet" description="Contact form submissions will show up here." />
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-2 sm:divide-y-0 dark:divide-slate-800">
                 {recentContacts.map((c) => (
-                  <Link key={c._id} to="/contact" className="flex items-start justify-between gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <Link key={c._id} to="/contact" className="flex items-start justify-between gap-3 border-slate-100 px-6 py-4 hover:bg-slate-50 sm:border-b dark:border-slate-800 dark:hover:bg-slate-800/50">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{c.name}</p>
                       <p className="truncate text-xs text-slate-500">{c.message || c.service || c.email}</p>
                     </div>
                     <span className="shrink-0 text-xs text-slate-400">{timeAgo(c.createdAt)}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent blog activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Blog Activity</CardTitle>
-            <Link to="/blog" className="flex items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400">
-              View all <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </CardHeader>
-          <CardContent className="p-0">
-            {!recentBlogs?.length ? (
-              <EmptyState title="No posts yet" description="Published and draft posts will show up here." />
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {recentBlogs.map((b) => (
-                  <Link key={b._id} to={`/blog/${b._id}/edit`} className="flex items-center justify-between gap-3 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{b.title}</p>
-                      <p className="text-xs text-slate-400">{b.views} views · {timeAgo(b.createdAt)}</p>
-                    </div>
-                    <StatusBadge status={b.status} />
                   </Link>
                 ))}
               </div>

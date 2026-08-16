@@ -21,8 +21,6 @@ export const submitContact = asyncHandler(async (req, res) => {
     userAgent: req.headers['user-agent'],
   })
 
-  // Fire-and-forget: a slow/broken SMTP server should never block the
-  // user-facing response or fail the form submission.
   EmailService.sendContactNotification(contact).catch((err) =>
     console.error('[email] contact notification failed:', err.message)
   )

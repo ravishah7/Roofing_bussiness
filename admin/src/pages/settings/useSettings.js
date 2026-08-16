@@ -36,3 +36,15 @@ export function useUploadBrand(field) {
     onError: (err) => toast.error(err.response?.data?.message || 'Upload failed'),
   })
 }
+
+export function useUpdateLegalContent() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload) => (await api.patch('/settings/legal', payload)).data.data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['settings'] })
+      toast.success('Legal content saved')
+    },
+    onError: (err) => toast.error(err.response?.data?.message || 'Failed to save legal content'),
+  })
+}

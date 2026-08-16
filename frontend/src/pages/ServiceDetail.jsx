@@ -20,6 +20,7 @@ export default function ServiceDetail() {
   const [lightboxIndex, setLightboxIndex] = useState(null)
 
   const { data, isLoading, isError } = useResourceItem('services', slug)
+  const rawService = data?.data
   const { data: listData } = useResourceList('services', { limit: 100, sort: 'order' })
 
   const { settings } = useSettings()

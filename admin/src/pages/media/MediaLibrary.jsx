@@ -53,12 +53,12 @@ export default function MediaLibrary() {
       <PageHeader
         title="Media Library"
         description="All images uploaded across your blog, projects, services, and gallery."
-        actions={
-          <>
-            <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
-            <Button icon={Upload} loading={upload.isPending} onClick={() => fileInputRef.current?.click()}>Upload Files</Button>
-          </>
-        }
+        // actions={
+        //   <>
+        //     <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleUpload} />
+        //     <Button icon={Upload} loading={upload.isPending} onClick={() => fileInputRef.current?.click()}>Upload Files</Button>
+        //   </>
+        // }
       />
 
       <Card>
@@ -76,13 +76,15 @@ export default function MediaLibrary() {
           </div>
         </div>
 
+{/* <EmptyState icon={LibraryBig} title="No media yet" description="Upload images to build your media library." actionLabel="Upload Files" onAction={() => fileInputRef.current?.click()} /> */}
+
         {isLoading ? (
           <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 lg:grid-cols-6">
             {[...Array(12)].map((_, i) => <div key={i} className="skeleton aspect-square rounded-xl" />)}
           </div>
         ) : items.length === 0 ? (
-          <EmptyState icon={LibraryBig} title="No media yet" description="Upload images to build your media library." actionLabel="Upload Files" onAction={() => fileInputRef.current?.click()} />
-        ) : view === 'grid' ? (
+          <EmptyState icon={LibraryBig} title="No media yet" description="Upload images to build your media library."/>
+        ) : view === 'grid' ? (     
           <div className="grid grid-cols-2 gap-4 p-4 sm:grid-cols-4 lg:grid-cols-6">
             {items.map((item) => (
               <div key={item._id} className="group relative aspect-square overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
