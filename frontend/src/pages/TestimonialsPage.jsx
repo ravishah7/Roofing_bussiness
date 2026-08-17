@@ -30,7 +30,7 @@ export default function TestimonialsPage() {
   return (
     <>
       <Seo title="Customer Reviews" description="Read what homeowners say about our roofing work." path="/testimonials" />
-      <PageHero eyebrow="Reviews" title="What our customers are saying." crumb="Testimonials" />
+      <PageHero eyebrow="Reviews" title="What our customers are saying." crumb="Testimonials" floatingShapes />
 
       {!showSkeleton && videoTestimonials.length > 0 && <VideoTestimonials videos={videoTestimonials} />}
 

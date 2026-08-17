@@ -35,7 +35,7 @@ function LegalPage({ title, crumb, description, content, updatedAt }) {
       <Seo title={title} description={description} path={`/${crumb.toLowerCase().replace(/\s+/g, '-')}`} />
 
       <div className="print:hidden">
-        <PageHero title={title} crumb={crumb} />
+        <PageHero title={title} crumb={crumb}  floatingShapes />
       </div>
 
       <section className="bg-white py-20 dark:bg-ink-950 print:bg-white print:py-0 print:dark:bg-white">
