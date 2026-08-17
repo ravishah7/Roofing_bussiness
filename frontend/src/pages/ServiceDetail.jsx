@@ -33,15 +33,36 @@ export default function ServiceDetail() {
       : null
 
   if (isLoading && !service) {
-    return (
-      <div className="bg-white py-32 dark:bg-ink-950">
-        <Container className="max-w-3xl space-y-4">
-          <div className="h-8 w-1/2 animate-pulse rounded-lg bg-ink-100 dark:bg-ink-800" />
-          <div className="h-64 w-full animate-pulse rounded-2xl bg-ink-100 dark:bg-ink-800" />
+  return (
+    <div className="bg-white dark:bg-ink-950">
+      {/* Hero skeleton */}
+      <div className="relative flex min-h-[70vh] flex-col justify-end bg-ink-950 pb-16 pt-40 md:min-h-[80vh] md:pb-20">
+        <Container>
+          <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
+          <div className="mt-6 h-16 w-16 animate-pulse rounded-2xl bg-white/10" />
+          <div className="mt-6 h-14 w-2/3 animate-pulse rounded-lg bg-white/10" />
+          <div className="mt-4 h-6 w-1/2 animate-pulse rounded-lg bg-white/10" />
         </Container>
       </div>
-    )
-  }
+
+      {/* Body skeleton */}
+      <section className="py-24 md:py-28">
+        <Container className="grid grid-cols-1 gap-16 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <div className="h-4 w-24 animate-pulse rounded bg-ink-100 dark:bg-ink-800" />
+            <div className="h-8 w-1/2 animate-pulse rounded-lg bg-ink-100 dark:bg-ink-800" />
+            <div className="space-y-2 pt-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-4 w-full animate-pulse rounded bg-ink-100 dark:bg-ink-800" />
+              ))}
+            </div>
+          </div>
+          <div className="h-64 animate-pulse rounded-3xl bg-ink-100 dark:bg-ink-800" />
+        </Container>
+      </section>
+    </div>
+  )
+}
 
   if (!service) return <NotFound />
 
